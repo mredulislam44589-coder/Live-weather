@@ -1,0 +1,50 @@
+name: Android CI - Build APK & AAB
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Repository Checkout
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Set up JDK (Android Studio-r jonno JDK 17 standard)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    # 3. Gradle File-e Executable Permission Dewa
+    - name: Grant Execute Permission for Gradlew
+      run: chmod +x gradlew
+
+    # 4. APK Build Kora (Debug Build)
+    - name: Build APK
+      run: ./gradlew assembleDebug
+
+    # 5. AAB (App Bundle) Build Kora (Release Build)
+    - name: Build AAB
+      run: ./gradlew bundleRelease
+
+    # 6. APK Artifact Upload Kora (Jeno GitHub theke download kora jay)
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+
+    # 7. AAB Artifact Upload Kora
+    - name: Upload AAB Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-aab
+        path: app/build/outputs/bundle/release/app-release.aab
